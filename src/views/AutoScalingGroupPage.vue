@@ -2,20 +2,12 @@
   <el-card class="container mx-auto" body-class="flex flex-col space-y-10">
     <div class="flex justify-between items-center">
       <el-breadcrumb separator="/">
-        <el-breadcrumb-item :to="{ path: '/auto-scaling-groups' }"
-          >Auto Scaling Groups</el-breadcrumb-item
-        >
+        <el-breadcrumb-item :to="{ path: '/auto-scaling-groups' }">Auto Scaling Groups</el-breadcrumb-item>
       </el-breadcrumb>
       <div class="flex flex-row space-x-2">
-        <el-button type="primary" icon="Plus" @click="showAddAutoScalingGroupDialog = true"
-          >Add Auto Scaling Group</el-button
-        >
-        <el-button
-          type="success"
-          icon="Refresh"
-          circle
-          @click="fetchAutoScalingGroups()"
-        ></el-button>
+        <el-button type="primary" icon="Plus" @click="showAddAutoScalingGroupDialog = true">Add Auto Scaling
+          Group</el-button>
+        <el-button type="success" icon="Refresh" circle @click="fetchAutoScalingGroups()"></el-button>
       </div>
     </div>
     <el-table :data="autoScalingGroups" v-loading="loading" class="w-full" stripe>
@@ -42,18 +34,13 @@
       <el-table-column label="Launch Template" align="center" width="320">
         <template #default="scope">
           <el-descriptions size="small" :column="1" border>
-            <el-descriptions-item
-              align="right"
-              :label="
-                launchTemplates.filter((launchTemplates) => launchTemplates.id === scope.row.lt_id)
-                  .length > 0
-                  ? launchTemplates.find(
-                      (launchTemplates) => launchTemplates.id === scope.row.lt_id
-                    ).name
-                  : scope.row.lt_id
-              "
-              ><b>v</b>{{ scope.row.lt_version }}</el-descriptions-item
-            >
+            <el-descriptions-item align="right" :label="launchTemplates.filter((launchTemplates) => launchTemplates.id === scope.row.lt_id)
+              .length > 0
+              ? launchTemplates.find(
+                (launchTemplates) => launchTemplates.id === scope.row.lt_id
+              ).name
+              : scope.row.lt_id
+              "><b>v</b>{{ scope.row.lt_version }}</el-descriptions-item>
             <el-descriptions-item align="right" label="Network Threshold">{{
               scope.row.network_threshold
             }}</el-descriptions-item>
@@ -71,8 +58,8 @@
             <el-descriptions-item align="right" label="Subnet">{{
               vpcs.filter((vpc) => vpc.id === scope.row.vpc_id).length > 0
                 ? vpcs
-                    .find((vpc) => vpc.id === scope.row.vpc_id)
-                    .subnets.find((subnet) => subnet.id === scope.row.subnet_id).label
+                  .find((vpc) => vpc.id === scope.row.vpc_id)
+                  .subnets.find((subnet) => subnet.id === scope.row.subnet_id).label
                 : scope.row.subnet_id
             }}</el-descriptions-item>
           </el-descriptions>
@@ -93,133 +80,59 @@
       <el-table-column label="Actions" width="200" align="center" fixed="right">
         <template #default="scope">
           <el-button type="info" icon="Setting" size="small" @click="manage(scope.row)"></el-button>
-          <el-button
-            type="primary"
-            icon="Edit"
-            size="small"
-            @click="editAutoScalingGroup(scope.row)"
-          ></el-button>
-          <el-button
-            type="danger"
-            icon="Delete"
-            size="small"
-            @click="confirmDeleteAutoScalingGroup(scope.row)"
-          ></el-button>
+          <el-button type="primary" icon="Edit" size="small" @click="editAutoScalingGroup(scope.row)"></el-button>
+          <el-button type="danger" icon="Delete" size="small"
+            @click="confirmDeleteAutoScalingGroup(scope.row)"></el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <template #footer>
       <div class="flex flex-row justify-end w-full">
-        <el-pagination
-          layout="total, sizes, prev, pager, next, jumper"
-          :page-sizes="[10, 20, 50, 100, 200, 300]"
-          v-model:page-size="pageSize"
-          v-model:current-page="currentPage"
-          :total="totalAutoScalingGroups"
-          @size-change="fetchAutoScalingGroups"
-          @current-change="fetchAutoScalingGroups"
-          class="flex justify-center"
-        />
+        <el-pagination layout="total, sizes, prev, pager, next, jumper" :page-sizes="[10, 20, 50, 100, 200, 300]"
+          v-model:page-size="pageSize" v-model:current-page="currentPage" :total="totalAutoScalingGroups"
+          @size-change="fetchAutoScalingGroups" @current-change="fetchAutoScalingGroups" class="flex justify-center" />
       </div>
     </template>
   </el-card>
 
   <!-- Add Dialog -->
-  <el-dialog
-    title="Add Auto Scaling Group"
-    v-model="showAddAutoScalingGroupDialog"
-    class="bg-white rounded-md"
-    append-to-body
-  >
+  <el-dialog title="Add Auto Scaling Group" v-model="showAddAutoScalingGroupDialog" class="bg-white rounded-md"
+    append-to-body>
     <el-form :model="newAutoScalingGroup" label-position="top">
       <el-form-item label="Name">
         <el-input v-model="newAutoScalingGroup.name" />
       </el-form-item>
       <el-form-item label="Launch Template ID">
-        <el-select
-          v-model="newAutoScalingGroup.launch_template_id"
-          placeholder="Select Launch Template"
-          @change="filterLaunchTemplateVersions('new')"
-        >
-          <el-option
-            v-for="lt in launchTemplates"
-            :key="lt.id"
-            :label="lt.name"
-            :value="lt.id"
-          ></el-option>
+        <el-select v-model="newAutoScalingGroup.launch_template_id" placeholder="Select Launch Template"
+          @change="filterLaunchTemplateVersions('new')">
+          <el-option v-for="lt in launchTemplates" :key="lt.id" :label="lt.name" :value="lt.id"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="Launch Template Version">
-        <el-select
-          v-model="newAutoScalingGroup.launch_template_version"
-          placeholder="Select Launch Template Version"
-        >
-          <el-option
-            v-for="lt in filteredNewLaunchTemplates"
-            :key="lt.version"
-            :label="lt.version"
-            :value="lt.version"
-          ></el-option>
+        <el-select v-model="newAutoScalingGroup.launch_template_version" placeholder="Select Launch Template Version">
+          <el-option v-for="lt in filteredNewLaunchTemplates" :key="lt.version" :label="lt.version"
+            :value="lt.version"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="VPC ID">
-        <el-select
-          v-model="newAutoScalingGroup.vpc_id"
-          placeholder="Select VPC"
-          v-if="filteredVpcs.length"
-        >
-          <el-option
-            v-for="vpc in filteredVpcs"
-            :key="vpc.id"
-            :label="vpc.label"
-            :value="vpc.id"
-          ></el-option>
-        </el-select>
-        <el-input v-else v-model="newAutoScalingGroup.vpc_id" placeholder="Enter VPC ID"></el-input>
+        <el-input v-model="newAutoScalingGroup.vpc_id" placeholder="Enter VPC ID"></el-input>
       </el-form-item>
       <el-form-item label="Subnet ID" v-if="newAutoScalingGroup.vpc_id">
-        <el-select v-model="newAutoScalingGroup.subnet_id" placeholder="Select Subnet">
-          <el-option
-            v-for="subnet in filteredSubnets"
-            :key="subnet.id"
-            :label="subnet.label + ' (' + subnet.ipv4 + ')'"
-            :value="subnet.id"
-          ></el-option>
-        </el-select>
+        <el-input v-model="newAutoScalingGroup.subnet_id" placeholder="Enter Subnet ID"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-switch
-          v-model="newAutoScalingGroup.use_https"
-          active-text="Use SSL"
-          @change="toggleSSL"
-        >
+        <el-switch v-model="newAutoScalingGroup.use_https" active-text="Use SSL" @change="toggleSSL">
         </el-switch>
       </el-form-item>
       <el-form-item label="SSL Certificate" v-if="newAutoScalingGroup.use_https">
-        <el-select
-          v-model="newAutoScalingGroup.ssl_certificate_cred_id"
-          placeholder="Select SSL Certificate"
-        >
-          <el-option
-            v-for="cred in credentials"
-            :key="cred.id"
-            :label="cred.name"
-            :value="cred.id"
-          ></el-option>
+        <el-select v-model="newAutoScalingGroup.ssl_certificate_cred_id" placeholder="Select SSL Certificate">
+          <el-option v-for="cred in credentials" :key="cred.id" :label="cred.name" :value="cred.id"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="Private Key" v-if="newAutoScalingGroup.use_https">
-        <el-select
-          v-model="newAutoScalingGroup.private_key_cred_id"
-          placeholder="Select Private Key"
-        >
-          <el-option
-            v-for="cred in credentials"
-            :key="cred.id"
-            :label="cred.name"
-            :value="cred.id"
-          ></el-option>
+        <el-select v-model="newAutoScalingGroup.private_key_cred_id" placeholder="Select Private Key">
+          <el-option v-for="cred in credentials" :key="cred.id" :label="cred.name" :value="cred.id"></el-option>
         </el-select>
       </el-form-item>
       <div class="grid grid-cols-2">
@@ -227,10 +140,8 @@
           <el-input-number v-model="newAutoScalingGroup.min_desired_capacity" :min="1" />
         </el-form-item>
         <el-form-item label="Max Instance Capacity">
-          <el-input-number
-            v-model="newAutoScalingGroup.max_desired_capacity"
-            :min="newAutoScalingGroup.min_desired_capacity + 1"
-          />
+          <el-input-number v-model="newAutoScalingGroup.max_desired_capacity"
+            :min="newAutoScalingGroup.min_desired_capacity + 1" />
         </el-form-item>
         <el-form-item label="CPU Threshold (%)">
           <el-input-number v-model="newAutoScalingGroup.cpu_threshold" :min="0" :max="100" />
@@ -239,19 +150,10 @@
           <el-input-number v-model="newAutoScalingGroup.memory_threshold" :min="0" :max="100" />
         </el-form-item>
         <el-form-item label="Control Loop Period (seconds)">
-          <el-input-number
-            v-model="newAutoScalingGroup.control_loop_period"
-            :min="30"
-            :max="3600"
-            :step="1"
-          />
+          <el-input-number v-model="newAutoScalingGroup.control_loop_period" :min="30" :max="3600" :step="1" />
         </el-form-item>
         <el-form-item label="Network Threshold (bytes)">
-          <el-input-number
-            v-model="newAutoScalingGroup.network_threshold"
-            :min="1"
-            :max="9999999999"
-          />
+          <el-input-number v-model="newAutoScalingGroup.network_threshold" :min="1" :max="9999999999" />
         </el-form-item>
       </div>
     </el-form>
@@ -261,137 +163,63 @@
     </template>
   </el-dialog>
 
-  <el-dialog
-    title="Confirmation"
-    v-model="showAddAsgDialog"
-    class="bg-white rounded-md"
-    append-to-body
-  >
+  <el-dialog title="Confirmation" v-model="showAddAsgDialog" class="bg-white rounded-md" append-to-body>
     <el-checkbox v-model="addConfirmed">I confirm that the details are correct?</el-checkbox>
     <template #footer>
       <el-button @click="showAddAsgDialog = false">Cancel</el-button>
-      <el-button type="success" :disabled="!addConfirmed" @click="createAutoScalingGroup"
-        >Create</el-button
-      >
+      <el-button type="success" :disabled="!addConfirmed" @click="createAutoScalingGroup">Create</el-button>
     </template>
   </el-dialog>
 
   <!-- Edit Dialog -->
-  <el-dialog
-    title="Edit Auto Scaling Group"
-    v-model="showEditAutoScalingGroupDialog"
-    class="bg-white rounded-md"
-    append-to-body
-  >
+  <el-dialog title="Edit Auto Scaling Group" v-model="showEditAutoScalingGroupDialog" class="bg-white rounded-md"
+    append-to-body>
     <el-form :model="editingAutoScalingGroup" label-position="top">
       <el-form-item label="Name">
         <el-input v-model="editingAutoScalingGroup.name" disabled />
       </el-form-item>
       <el-form-item label="Launch Template ID">
-        <el-select
-          v-model="editingAutoScalingGroup.launch_template_id"
-          placeholder="Select Launch Template"
-          @change="filterLaunchTemplateVersions('edit')"
-          disabled
-        >
-          <el-option
-            v-for="lt in launchTemplates"
-            :key="lt.id"
-            :label="lt.name"
-            :value="lt.id"
-          ></el-option>
+        <el-select v-model="editingAutoScalingGroup.launch_template_id" placeholder="Select Launch Template"
+          @change="filterLaunchTemplateVersions('edit')" disabled>
+          <el-option v-for="lt in launchTemplates" :key="lt.id" :label="lt.name" :value="lt.id"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="Launch Template Version">
-        <el-select
-          v-model="editingAutoScalingGroup.launch_template_version"
-          placeholder="Select Launch Template Version"
-        >
-          <el-option
-            v-for="lt in filteredEditLaunchTemplates"
-            :key="lt.version"
-            :label="lt.version"
-            :value="lt.version"
-          ></el-option>
+        <el-select v-model="editingAutoScalingGroup.launch_template_version"
+          placeholder="Select Launch Template Version">
+          <el-option v-for="lt in filteredEditLaunchTemplates" :key="lt.version" :label="lt.version"
+            :value="lt.version"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="VPC ID">
-        <el-select
-          v-model="editingAutoScalingGroup.vpc_id"
-          placeholder="Select VPC"
-          v-if="filteredVpcs.length"
-        >
-          <el-option
-            v-for="vpc in filteredVpcs"
-            :key="vpc.id"
-            :label="vpc.label"
-            :value="vpc.id"
-          ></el-option>
-        </el-select>
-        <el-input
-          v-else
-          v-model="editingAutoScalingGroup.vpc_id"
-          placeholder="Enter VPC ID"
-        ></el-input>
+        <el-input v-model="editingAutoScalingGroup.vpc_id" placeholder="Enter VPC ID"></el-input>
       </el-form-item>
+
       <el-form-item label="Subnet ID" v-if="editingAutoScalingGroup.vpc_id">
-        <el-select v-model="editingAutoScalingGroup.subnet_id" placeholder="Select Subnet">
-          <el-option
-            v-for="subnet in filteredSubnets"
-            :key="subnet.id"
-            :label="subnet.label + ' (' + subnet.ipv4 + ')'"
-            :value="subnet.id"
-          ></el-option>
-        </el-select>
+        <el-input v-model="editingAutoScalingGroup.subnet_id" placeholder="Enter Subnet ID"></el-input>
       </el-form-item>
+
       <el-form-item>
-        <el-switch
-          v-model="editingAutoScalingGroup.use_https"
-          active-text="Use SSL"
-          @change="toggleSSL"
-        >
+        <el-switch v-model="editingAutoScalingGroup.use_https" active-text="Use SSL" @change="toggleSSL">
         </el-switch>
       </el-form-item>
       <el-form-item label="SSL Certificate" v-if="editingAutoScalingGroup.use_https">
-        <el-select
-          v-model="editingAutoScalingGroup.ssl_certificate_cred_id"
-          placeholder="Select SSL Certificate"
-        >
-          <el-option
-            v-for="cred in credentials"
-            :key="cred.id"
-            :label="cred.name"
-            :value="cred.id"
-          ></el-option>
+        <el-select v-model="editingAutoScalingGroup.ssl_certificate_cred_id" placeholder="Select SSL Certificate">
+          <el-option v-for="cred in credentials" :key="cred.id" :label="cred.name" :value="cred.id"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="Private Key" v-if="editingAutoScalingGroup.use_https">
-        <el-select
-          v-model="editingAutoScalingGroup.private_key_cred_id"
-          placeholder="Select Private Key"
-        >
-          <el-option
-            v-for="cred in credentials"
-            :key="cred.id"
-            :label="cred.name"
-            :value="cred.id"
-          ></el-option>
+        <el-select v-model="editingAutoScalingGroup.private_key_cred_id" placeholder="Select Private Key">
+          <el-option v-for="cred in credentials" :key="cred.id" :label="cred.name" :value="cred.id"></el-option>
         </el-select>
       </el-form-item>
       <div class="grid grid-cols-2">
         <el-form-item label="Min Instance Capacity">
-          <el-input-number
-            v-model="editingAutoScalingGroup.min_desired_capacity"
-            :min="1"
-            :max="100"
-          />
+          <el-input-number v-model="editingAutoScalingGroup.min_desired_capacity" :min="1" :max="100" />
         </el-form-item>
         <el-form-item label="Max Instance Capacity">
-          <el-input-number
-            v-model="editingAutoScalingGroup.max_desired_capacity"
-            :min="editingAutoScalingGroup.min_desired_capacity + 1"
-            :max="100"
-          />
+          <el-input-number v-model="editingAutoScalingGroup.max_desired_capacity"
+            :min="editingAutoScalingGroup.min_desired_capacity + 1" :max="100" />
         </el-form-item>
         <el-form-item label="CPU Threshold (%)">
           <el-input-number v-model="editingAutoScalingGroup.cpu_threshold" :min="0" :max="100" />
@@ -400,19 +228,10 @@
           <el-input-number v-model="editingAutoScalingGroup.memory_threshold" :min="0" :max="100" />
         </el-form-item>
         <el-form-item label="Control Loop Period (seconds)">
-          <el-input-number
-            v-model="editingAutoScalingGroup.control_loop_period"
-            :min="30"
-            :max="3600"
-            :step="1"
-          />
+          <el-input-number v-model="editingAutoScalingGroup.control_loop_period" :min="30" :max="3600" :step="1" />
         </el-form-item>
         <el-form-item label="Network Threshold (bytes)">
-          <el-input-number
-            v-model="editingAutoScalingGroup.network_threshold"
-            :min="1"
-            :max="9999999999"
-          />
+          <el-input-number v-model="editingAutoScalingGroup.network_threshold" :min="1" :max="9999999999" />
         </el-form-item>
       </div>
     </el-form>
@@ -422,28 +241,17 @@
     </template>
   </el-dialog>
 
-  <el-dialog
-    title="Confirmation"
-    v-model="showUpdateAsgDialog"
-    class="bg-white rounded-md"
-    append-to-body
-  >
+  <el-dialog title="Confirmation" v-model="showUpdateAsgDialog" class="bg-white rounded-md" append-to-body>
     <el-checkbox v-model="addConfirmed">I confirm that the details are correct?</el-checkbox>
     <template #footer>
       <el-button @click="showUpdateAsgDialog = false">Cancel</el-button>
-      <el-button type="success" :disabled="!addConfirmed" @click="updateAutoScalingGroup"
-        >Update</el-button
-      >
+      <el-button type="success" :disabled="!addConfirmed" @click="updateAutoScalingGroup">Update</el-button>
     </template>
   </el-dialog>
 
   <!-- Delete Confirmation Dialog -->
-  <el-dialog
-    title="Delete Auto Scaling Group"
-    v-model="showDeleteAutoScalingGroupDialog"
-    class="bg-white rounded-md"
-    append-to-body
-  >
+  <el-dialog title="Delete Auto Scaling Group" v-model="showDeleteAutoScalingGroupDialog" class="bg-white rounded-md"
+    append-to-body>
     <p>Are you sure you want to delete this auto scaling group?</p>
     <template #footer>
       <el-button @click="showDeleteAutoScalingGroupDialog = false">Cancel</el-button>
@@ -597,32 +405,32 @@ export default {
         this.fetchSubnetsByVPC(this.editingAutoScalingGroup.vpc_id)
       }
     },
-    fetchVpcs() {
-      this.loading = true
-      axios
-        .get('https://api.linode.com/v4/vpcs', {
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${this.linodeToken}`
-          }
-        })
-        .then((response) => {
-          this.vpcs = response.data.data.map((vpc) => ({
-            id: vpc.id,
-            label: vpc.label,
-            region: vpc.region,
-            subnets: vpc.subnets
-          }))
-          this.filterVpcsByRegion()
-        })
-        .catch((error) => {
-          console.error('Error fetching VPCs:', error)
-          this.$message.error('Error fetching VPCs')
-        })
-        .finally(() => {
-          this.loading = false
-        })
-    },
+    // fetchVpcs() {
+    //   this.loading = true
+    //   axios
+    //     .get('https://api.linode.com/v4/vpcs', {
+    //       headers: {
+    //         Accept: 'application/json',
+    //         Authorization: `Bearer ${this.linodeToken}`
+    //       }
+    //     })
+    //     .then((response) => {
+    //       this.vpcs = response.data.data.map((vpc) => ({
+    //         id: vpc.id,
+    //         label: vpc.label,
+    //         region: vpc.region,
+    //         subnets: vpc.subnets
+    //       }))
+    //       this.filterVpcsByRegion()
+    //     })
+    //     .catch((error) => {
+    //       console.error('Error fetching VPCs:', error)
+    //       this.$message.error('Error fetching VPCs')
+    //     })
+    //     .finally(() => {
+    //       this.loading = false
+    //     })
+    // },
     fetchCredentials() {
       this.loading = true
       this.makeRequest('post', 'artillery-service/v1/credential.list')
@@ -642,7 +450,7 @@ export default {
         })
         .finally(() => {
           this.loading = false
-          this.fetchVpcs()
+          // this.fetchVpcs()
         })
     },
     fetchLaunchTemplates() {
