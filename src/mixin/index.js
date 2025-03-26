@@ -82,8 +82,7 @@ const mixin = {
         },
         makeRequest(method, endpoint, data = {}, headers = {}, params = {}) {
             this.loading = true;
-
-
+        
             let config = {
                 method: method,
                 url: `${this.apiUrl}${endpoint}`,
@@ -94,14 +93,22 @@ const mixin = {
                     ...headers
                 }
             };
-
+        
             if (method === 'post') {
                 config.data = data;
             } else if (method === 'get') {
                 config.params = params;
             }
-
-            return axios(config);
+        
+            return axios(config)
+                .then(response => response) 
+                .catch(error => {
+                    this.showErrorMessage(error); 
+                    return Promise.reject(error); 
+                })
+                .finally(() => {
+                    this.loading = false;
+                });
         },
         generateRandomPassword(length) {
             const specials = '!@#$%^&*()_+{}[]:;"\'<>,.?/';
@@ -146,25 +153,22 @@ const mixin = {
         },
         showErrorMessage(error) {
             console.log(error.response.data);
-            if (error.response && error.response.data && error.response.data) {
-                if (error.response.data.error && !Array.isArray(error.response.data.error)) {
-                    this.$message.error({ message: error.response.data.error, dangerouslyUseHTMLString: true });
+            if (error.response && error.response.data) {
+                let errorMessage = 'Error: ';
+                const errorData = error.response.data.error;
+        
+                if (Array.isArray(errorData)) {
+                    errorMessage += errorData.join(', '); 
                 } else {
-                    let errorMessage = '<b>Error:</b>';
-                    const errorData = error.response.data.error;
-                    if (Array.isArray(errorData)) {
-                        errorData.forEach(err => {
-                            errorMessage += `<br>• ${err}`;
-                        });
-                    } else {
-                        errorMessage += `<br>${errorData}`;
-                    }
-                    this.$message.error({ message: errorMessage, dangerouslyUseHTMLString: true });
+                    errorMessage += errorData;
                 }
+        
+                this.$message.error({ message: errorMessage, dangerouslyUseHTMLString: true });
             } else {
                 this.$message.error('An unknown error occurred.');
             }
-        },
+        }
+        ,
         timeAgo(dateString) {
             const now = new Date();
             const past = new Date(dateString);
