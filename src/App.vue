@@ -51,10 +51,10 @@
             <el-icon><DataAnalysis /></el-icon>
             <template #title>Logs</template>
           </el-menu-item>
-          <el-menu-item index="/object-storage">
+          <!-- <el-menu-item index="/object-storage">
             <el-icon><TakeawayBox /></el-icon>
             <template #title>Object Storage</template>
-          </el-menu-item>
+          </el-menu-item> -->
           <el-menu-item index="/settings">
             <el-icon><Tools /></el-icon>
             <template #title>Settings</template>
