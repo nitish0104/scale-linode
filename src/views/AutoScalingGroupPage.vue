@@ -492,82 +492,84 @@ export default {
         })
     },
     createAutoScalingGroup() {
-      this.showAddAsgDialog = false
-      this.loading = true
-      this.makeRequest('post', 'asg-service/v1/asg.create', this.newAutoScalingGroup)
-        .then(() => {
-          this.showAddAutoScalingGroupDialog = false
-          this.newAutoScalingGroup = {
-            name: '',
-            launch_template_id: '',
-            launch_template_version: '',
-            min_desired_capacity: 1,
-            max_desired_capacity: 1,
-            cpu_threshold: '80',
-            memory_threshold: '90',
-            use_https: false,
-            control_loop_period: 30,
-            network_threshold: 31457280,
-            ssl_certificate_cred_id: null,
-            private_key_cred_id: null
-          }
-          this.fetchAutoScalingGroups()
-          this.$message.success('Auto scaling group created successfully')
-        })
-        .catch((error) => {
-          console.error('Error creating auto scaling group:', error)
-          this.$message.error('Error creating auto scaling group')
-        })
-        .finally(() => {
-          this.loading = false
-        })
-    },
-    editAutoScalingGroup(autoScalingGroup) {
-      this.loading = true
-      this.makeRequest('post', 'asg-service/v1/asg.describe', { asg_id: autoScalingGroup.id })
-        .then((response) => {
-          this.editingAutoScalingGroup = {
-            asg_id: response.data.id,
-            name: response.data.name,
-            launch_template_id: response.data.lt_id,
-            launch_template_version: response.data.lt_version,
-            min_desired_capacity: response.data.min_desired_capacity,
-            max_desired_capacity: response.data.max_desired_capacity,
-            cpu_threshold: response.data.cpu_threshold,
-            memory_threshold: response.data.memory_threshold,
-            nodebalancer_ip: response.data.nodebalancer_ip,
-            webhook_url: response.data.webhook_url,
-            created_at: response.data.created_at,
-            use_https: response.data?.use_https,
-            control_loop_period: response.data.control_loop_period || 30,
-            network_threshold: response.data.network_threshold || 31457280,
-            ssl_certificate_cred_id: '',
-            private_key_cred_id: ''
-          }
-          if (response.data.vpc_id) {
-            this.editingAutoScalingGroup.vpc_id = response.data.vpc_id
-          }
-          if (response.data.subnet_id) {
-            this.editingAutoScalingGroup.subnet_id = response.data.subnet_id
-          }
-          if (response.data.ssl_certificate_cred_id) {
-            this.editingAutoScalingGroup.ssl_certificate_cred_id =
-              response.data.ssl_certificate_cred_id
-          }
-          if (response.data.private_key_cred_id) {
-            this.editingAutoScalingGroup.private_key_cred_id = response.data.private_key_cred_id
-          }
-          this.filterLaunchTemplateVersions('edit')
-          this.showEditAutoScalingGroupDialog = true
-        })
-        .catch((error) => {
-          console.error('Server responded with an error:', error.response.data)
-          this.$message.error('Error fetching auto scaling group: Server responded with an error')
-        })
-        .finally(() => {
-          this.loading = false
-        })
-    },
+  this.showAddAsgDialog = false
+  this.loading = true
+
+  // Convert vpc_id and subnet_id to numbers
+  const payload = {
+    ...this.newAutoScalingGroup,
+    vpc_id: Number(this.newAutoScalingGroup.vpc_id), 
+    subnet_id: Number(this.newAutoScalingGroup.subnet_id) 
+  }
+
+  this.makeRequest('post', 'asg-service/v1/asg.create', payload)
+    .then(() => {
+      this.showAddAutoScalingGroupDialog = false
+      this.newAutoScalingGroup = {
+        name: '',
+        launch_template_id: '',
+        launch_template_version: '',
+        min_desired_capacity: 1,
+        max_desired_capacity: 1,
+        cpu_threshold: 80, 
+        memory_threshold: 90, 
+        use_https: false,
+        control_loop_period: 30,
+        network_threshold: 31457280,
+        ssl_certificate_cred_id: null,
+        private_key_cred_id: null,
+        vpc_id: null, 
+        subnet_id: null 
+      }
+      this.fetchAutoScalingGroups()
+      this.$message.success('Auto scaling group created successfully')
+    })
+    .catch((error) => {
+      console.error('Error creating auto scaling group:', error)
+      this.$message.error('Error creating auto scaling group')
+    })
+    .finally(() => {
+      this.loading = false
+    })
+},
+
+editAutoScalingGroup(autoScalingGroup) {
+  this.loading = true
+  this.makeRequest('post', 'asg-service/v1/asg.describe', { asg_id: autoScalingGroup.id })
+    .then((response) => {
+      this.editingAutoScalingGroup = {
+        asg_id: response.data.id,
+        name: response.data.name,
+        launch_template_id: response.data.lt_id,
+        launch_template_version: response.data.lt_version,
+        min_desired_capacity: response.data.min_desired_capacity,
+        max_desired_capacity: response.data.max_desired_capacity,
+        cpu_threshold: response.data.cpu_threshold,
+        memory_threshold: response.data.memory_threshold,
+        nodebalancer_ip: response.data.nodebalancer_ip,
+        webhook_url: response.data.webhook_url,
+        created_at: response.data.created_at,
+        use_https: response.data?.use_https,
+        control_loop_period: response.data.control_loop_period || 30,
+        network_threshold: response.data.network_threshold || 31457280,
+        ssl_certificate_cred_id: response.data.ssl_certificate_cred_id || '',
+        private_key_cred_id: response.data.private_key_cred_id || '',
+        vpc_id: response.data.vpc_id ? Number(response.data.vpc_id) : null,  // Convert to number
+        subnet_id: response.data.subnet_id ? Number(response.data.subnet_id) : null  // Convert to number
+      }
+
+      this.filterLaunchTemplateVersions('edit')
+      this.showEditAutoScalingGroupDialog = true
+    })
+    .catch((error) => {
+      console.error('Server responded with an error:', error.response.data)
+      this.$message.error('Error fetching auto scaling group: Server responded with an error')
+    })
+    .finally(() => {
+      this.loading = false
+    })
+},
+
     updateAutoScalingGroup() {
       this.loading = true
       this.showUpdateAsgDialog = false
