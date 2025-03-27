@@ -22,25 +22,25 @@
             <el-table-column prop="version" label="Version" align="center" />
             <el-table-column label="Plan">
                 <template #default="scope">
-                    <p>{{ linode_types.filter(plan => plan.id === scope.row.plan_id).length > 0 ?
-                        linode_types.find(plan => plan.id === scope.row.plan_id).label : scope.row.plan_id }}</p>
+                    <p>{{linode_types.filter(plan => plan.id === scope.row.plan_id).length > 0 ?
+                        linode_types.find(plan => plan.id === scope.row.plan_id).label : scope.row.plan_id}}</p>
                 </template>
             </el-table-column>
             <el-table-column label="Image">
                 <template #default="scope">
-                    <p>{{ images.filter(image => image.id === scope.row.image_id).length > 0 ? images.find(image =>
-                        image.id === scope.row.image_id).label : scope.row.image_id }}</p>
+                    <p>{{images.filter(image => image.id === scope.row.image_id).length > 0 ? images.find(image =>
+                        image.id === scope.row.image_id).label : scope.row.image_id}}</p>
                 </template>
             </el-table-column>
             <el-table-column label="Region">
                 <template #default="scope">
-                    <p>{{ regions.filter(region => region.id === scope.row.region_id).length > 0 ?
-                        regions.find(region => region.id === scope.row.region_id).label : scope.row.region_id }}</p>
+                    <p>{{regions.filter(region => region.id === scope.row.region_id).length > 0 ?
+                        regions.find(region => region.id === scope.row.region_id).label : scope.row.region_id}}</p>
                 </template>
             </el-table-column>
             <el-table-column label="Firewall">
                 <template #default="scope">
-                    <p>{{ firewalls.filter(firewall => firewall.id === scope.row.firewall_id).length > 0 ?
+                    <p>{{firewalls.filter(firewall => firewall.id === scope.row.firewall_id).length > 0 ?
                         firewalls.find(firewall => firewall.id === scope.row.firewall_id).label : scope.row.firewall_id
                         }}</p>
                 </template>
@@ -135,7 +135,9 @@
                 <el-input v-model="newLaunchTemplate.port" />
             </el-form-item>
             <el-form-item label="Firewall ID">
-                <el-input v-model="newLaunchTemplate.firewall_id" placeholder="Enter Firewall ID manually"></el-input>
+                <el-input v-model.number="newLaunchTemplate.firewall_id" placeholder="Enter Firewall ID manually"
+                    type="number" min="0">
+                </el-input>
             </el-form-item>
 
         </el-form>
@@ -211,7 +213,9 @@
                 <el-input v-model="editingLaunchTemplate.port" />
             </el-form-item>
             <el-form-item label="Firewall ID">
-                <el-input v-model="newLaunchTemplate.firewall_id" placeholder="Enter Firewall ID manually"></el-input>
+                <el-input v-model.number="editingLaunchTemplate.firewall_id" placeholder="Enter Firewall ID manually"
+                    type="number" min="0">
+                </el-input>
             </el-form-item>
 
         </el-form>
@@ -451,7 +455,7 @@ export default {
                             start_command: ""
                         },
                         port: '80',
-                        firewall_id: 0,
+                        firewall_id: Number(this.newLaunchTemplate.firewall_id) || 0,
                     };
                     this.fetchLaunchTemplates();
                     this.$message.success('Launch template created successfully');
