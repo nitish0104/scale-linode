@@ -147,12 +147,6 @@ export default {
           if (linodeToken) {
             this.linodeToken = linodeToken.value
             localStorage.setItem('linodeToken', this.linodeToken)
-          } else {
-            this.newCredential = {
-              name: 'LINODE_TOKEN',
-              value: '<your-linode-token>'
-            }
-            this.createCredential()
           }
         })
         .catch((error) => {
